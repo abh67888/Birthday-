@@ -1,0 +1,231 @@
+<!--
+Happy Birthday Surprise - single-file HTML (internal CSS & JS)
+Save as: happy_birthday_surprise.html
+Open in browser (desktop or mobile). Tap/click the cover to start.
+Features:
+- 3 "pages" revealed one after another with flip/slide animations
+- Heart floating background
+- Confetti + cake + big HAPPY BIRTHDAY finale
+- Optional synthesized "Happy Birthday" tune (play/pause button)
+- All inline (no external assets needed)
+--><!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Happy Birthday Surprise</title>
+  <style>
+    :root{--bg:#0b1020;--card:#111827;--accent:#ff5c8a;--card2:#0f1724}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Arial;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 20% 10%, #0f1530 0%, #05060a 40%),var(--bg);color:#fff}
+    .stage{width:95vw;max-width:900px;height:86vh;max-height:700px;position:relative;overflow:hidden;border-radius:18px;box-shadow:0 10px 40px rgba(2,6,23,.7),0 2px 6px rgba(0,0,0,.6)}
+    /* floating hearts */
+    .hearts{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+    .heart{position:absolute;width:18px;height:18px;background:var(--accent);transform:rotate(-45deg);border-radius:4px;opacity:.9}
+    .heart:before,.heart:after{content:'';position:absolute;width:18px;height:18px;background:var(--accent);border-radius:50%}
+    .heart:before{top:-9px;left:0}
+    .heart:after{left:9px;top:0}/* book-like pages container */
+.book{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3}
+.cover{width:76%;max-width:640px;height:72%;background:linear-gradient(135deg,#111827,#0f1724);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(2px);box-shadow:0 8px 30px rgba(2,6,23,.7);cursor:pointer;transform-origin:center;transition:transform .8s cubic-bezier(.2,.9,.3,1)}
+.cover h1{font-size:2.2rem;margin:8px 20px 0;text-align:center;letter-spacing:1px}
+.cover p{margin:6px 20px 18px;color:#cbd5e1}
+.cover .start-btn{padding:12px 20px;border-radius:999px;background:linear-gradient(90deg,var(--accent),#ffb199);border:none;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,92,138,.12)}
+
+/* pages */
+.pages{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:14px;pointer-events:none}
+.page{width:62%;max-width:520px;height:62%;background:linear-gradient(180deg,#0b1222 0%, #071021 100%);border-radius:12px;padding:26px;box-shadow:0 10px 40px rgba(2,6,23,.6);transform-style:preserve-3d;backface-visibility:hidden;opacity:0;transform:translateY(30px) scale(.96);transition:all .9s cubic-bezier(.18,.9,.3,1)}
+.page.show{opacity:1;transform:translateY(0) scale(1)}
+.page h2{font-size:1.6rem;margin:0 0 8px}
+.page p{color:#cbd5e1;line-height:1.45}
+
+/* final big reveal */
+.final{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:6;pointer-events:none;opacity:0;transition:opacity .6s}
+.final.show{opacity:1;pointer-events:auto}
+.happy{font-size:3rem;letter-spacing:6px;background:linear-gradient(90deg,#fff,#ffd1e6);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin:6px}
+.cake{width:180px;height:160px;border-radius:12px;background:linear-gradient(180deg,#ffe7f0,#ffd1e0);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.4);position:relative}
+.candle{position:absolute;top:-22px;width:6px;height:36px;background:#ffdf80;border-radius:3px}
+.flame{position:absolute;top:-12px;width:12px;height:18px;border-radius:50%;background:linear-gradient(180deg,#fff176,#ff8a65);transform:translateX(-3px);filter:drop-shadow(0 2px 4px rgba(255,140,90,.4))}
+
+/* confetti */
+.confetti{position:absolute;inset:0;pointer-events:none;z-index:7}
+.confetti i{position:absolute;width:10px;height:16px;opacity:0;transform-origin:center;transform:translateY(-20px) rotate(0deg);}
+
+/* controls */
+.controls{position:absolute;right:14px;bottom:14px;z-index:8;display:flex;gap:10px}
+.btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);padding:8px 12px;border-radius:10px;color:#fff;cursor:pointer;backdrop-filter:blur(4px)}
+
+/* small screen tweaks */
+@media (max-width:520px){
+  .cover h1{font-size:1.6rem}
+  .happy{font-size:2.2rem}
+  .cake{width:140px;height:120px}
+}
+
+  </style>
+</head>
+<body>
+  <div class="stage" role="application" aria-label="Birthday surprise card">
+    <div class="hearts" aria-hidden="true"></div><div class="book" id="book">
+  <div class="cover" id="cover">
+    <svg width="90" height="90" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 2C13.1046 2 14 2.89543 14 4C14 5.10457 13.1046 6 12 6C10.8954 6 10 5.10457 10 4C10 2.89543 10.8954 2 12 2Z" fill="#ffb3c7"/>
+      <path d="M6 8C7.10457 8 8 8.89543 8 10C8 11.1046 7.10457 12 6 12C4.89543 12 4 11.1046 4 10C4 8.89543 4.89543 8 6 8Z" fill="#ff678f"/>
+    </svg>
+    <h1>Happy Birthday Kusum</h1>
+    <p>Tap kr ispe</p>
+    <button class="start-btn" id="startBtn">Open Gift ✨</button>
+  </div>
+
+  <div class="pages" id="pages" aria-hidden="true">
+    <div class="page" id="page1">
+      <h2>Dear Bestie,</h2>
+      <p>Yaar,maine bhot si glti ki hai like mai tere sath acha behave nhu kiya but from bottom of my heart mai kbhi tujhe hurt nhi krna chahta hu .</p>
+    </div>
+    <div class="page" id="page2">
+      <h2>Wishes</h2>
+      <p>May your life be full of success, khush rho humesha and ho sake to is dost ko na bhulna!</p>
+    </div>
+    <div class="page" id="page3">
+      <h2>Ek Surprise</h2>
+      <p>Ab bas ek aur button dabao aur surprise khul jaayega...</p>
+    </div>
+  </div>
+</div>
+
+<div class="final" id="final">
+  <div class="happy">HAPPY BIRTHDAY Tamatr🎉</div>
+  <div class="cake" role="img" aria-label="Cake with candle">
+    <div class="candle"></div>
+    <div class="flame"></div>
+  </div>
+</div>
+
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+
+<div class="controls">
+  <button class="btn" id="musicBtn">Play Song</button>
+  <button class="btn" id="downloadBtn">Download HTML</button>
+</div>
+
+  </div>  <script>
+    // generate floating hearts
+    const heartsContainer = document.querySelector('.hearts');
+    for(let i=0;i<22;i++){
+      const h = document.createElement('div');
+      h.className='heart';
+      h.style.left = Math.random()*100+'%';
+      h.style.top = Math.random()*100+'%';
+      h.style.opacity = (0.35+Math.random()*0.85).toFixed(2);
+      const s = 8+Math.random()*28;
+      h.style.width = s+'px'; h.style.height = s+'px';
+      h.style.transform = 'rotate('+(Math.random()*60-30)+'deg)';
+      heartsContainer.appendChild(h);
+      // animate
+      const dur = 6+Math.random()*10;
+      h.animate([{transform: 'translateY(0) rotate('+ (Math.random()*40-20) +'deg)', opacity:h.style.opacity},{transform: 'translateY(-350px) rotate('+ (Math.random()*40-20) +'deg)', opacity:0}],{duration:dur*1000,iterations:Infinity,delay:-Math.random()*6000});
+    }
+
+    const cover = document.getElementById('cover');
+    const startBtn = document.getElementById('startBtn');
+    const pages = document.getElementById('pages');
+    const pageEls = [document.getElementById('page1'),document.getElementById('page2'),document.getElementById('page3')];
+    const final = document.getElementById('final');
+    const confettiContainer = document.getElementById('confetti');
+    const musicBtn = document.getElementById('musicBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    let musicPlaying=false, audioCtx=null, idx=null;
+    function playSynthHappyBirthday(){
+      if(!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const notes = [392,392,440,392,523,494,392,392,440,392,587,523,392,392,784,587,523,494,659,659,659,587,523,494,440];
+      const dur = 0.18; // seconds per note
+      let t = audioCtx.currentTime + 0.02;
+      for(let i=0;i<notes.length;i++){
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sine';
+        o.frequency.value = notes[i];
+        g.gain.value = 0.0001;
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t);
+        g.gain.exponentialRampToValueAtTime(0.12,t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+        o.stop(t+dur+0.02);
+        t += dur;
+      }
+    }
+
+    musicBtn.addEventListener('click',()=>{
+      if(!musicPlaying){
+        playSynthHappyBirthday();
+        musicPlaying=true; musicBtn.textContent='Play Again';
+      } else {
+        // small feedback - just play again
+        playSynthHappyBirthday();
+      }
+    });
+
+    // download HTML file
+    downloadBtn.addEventListener('click',()=>{
+      const html = '<!doctype html>' + document.documentElement.outerHTML;
+      const blob = new Blob([html],{type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'happy_birthday_surprise.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    function showPagesSequence(){
+      cover.style.transform = 'scale(.92) translateY(-6px) rotateX(6deg)';
+      pages.style.pointerEvents='auto';
+      // fade out cover after short moment
+      setTimeout(()=>cover.style.opacity='0',600);
+      // show pages one-by-one
+      pageEls.forEach((el,i)=>{
+        setTimeout(()=>{el.classList.add('show');},600 + i*700);
+      });
+      // after pages show, reveal final
+      setTimeout(()=>{
+        final.classList.add('show');
+        launchConfetti();
+        // small spark on cake flame
+        const flame = document.querySelector('.flame');
+        flame.animate([{transform:'translateX(-3px) scale(1)'},{transform:'translateX(-3px) scale(1.06)'},{transform:'translateX(-3px) scale(1)'}],{duration:900,iterations:Infinity});
+      },600 + pageEls.length*700 + 600);
+    }
+
+    startBtn.addEventListener('click',()=>{
+      showPagesSequence();
+      // play music automatically once when opened (browser may require user gesture, which click provides)
+      playSynthHappyBirthday();
+    });
+
+    cover.addEventListener('click',(e)=>{
+      // if user clicks outside button, still open
+      if(e.target !== startBtn) { showPagesSequence(); playSynthHappyBirthday(); }
+    });
+
+    // simple confetti generator
+    function launchConfetti(){
+      const colors = ['#ff5c8a','#ffd166','#8bd3ff','#b9ffb3','#f6a6ff'];
+      for(let i=0;i<120;i++){
+        const el = document.createElement('i');
+        el.style.left = Math.random()*100 + '%';
+        el.style.top = (-10-Math.random()*10)+'%';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.width = (6+Math.random()*10)+'px';
+        el.style.height = (8+Math.random()*10)+'px';
+        el.style.opacity = Math.random();
+        confettiContainer.appendChild(el);
+        // fall animation
+        const dur = 2200 + Math.random()*1800;
+        el.animate([{transform:'translateY(0) rotate(0deg)'},{transform:'translateY(110vh) rotate('+ (300*Math.random()-150) +'deg)'}],{duration:dur,iterations:1,easing:'cubic-bezier(.15,.9,.3,1)'});
+        setTimeout(()=>el.remove(),dur+50);
+      }
+    }
+
+    // accessibility: keyboard start
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Enter') { startBtn.click(); } });
+
+  </script></body>
+</html>
